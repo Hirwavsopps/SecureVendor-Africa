@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CyberShield Rwanda</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --border: #1a2332;
+    --green: #00ff88;
+    --green-dim: #00ff8844;
+    --red: #ff3b5c;
+    --yellow: #ffd700;
+    --cyan: #00e5ff;
+    --text: #c9d1d9;
+    --text-dim: #556070;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+    position: relative;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    border: 2px solid var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 16px var(--green-dim);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 16px var(--green-dim); }
+    50% { box-shadow: 0 0 32px var(--green); }
+  }
+  .logo-text { font-size: 20px; font-weight: 800; letter-spacing: 2px; color: #fff; }
+  .logo-sub { font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: 3px; }
+  .status-bar {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* Hero */
+  .hero {
+    padding: 60px 0 40px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--green); }
+  .hero p {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.8;
+  }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green);
+    border: 1px solid var(--green-dim);
+    padding: 4px 12px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  /* Panel */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Password Checker */
+  .checker-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .checker-box h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .checker-box p {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+  .input-wrap { position: relative; margin-bottom: 20px; }
+  .pw-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 16px;
+    padding: 16px 50px 16px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 2px;
+  }
+  .pw-input:focus { border-color: var(--green); }
+  .toggle-btn {
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px;
+  }
+
+  /* Strength meter */
+  .strength-bars {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .bar {
+    height: 4px; flex: 1;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .strength-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    margin-bottom: 20px;
+    height: 18px;
+  }
+
+  /* Criteria */
+  .criteria { display: flex; flex-direction: column; gap: 8px; }
+  .criterion {
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .criterion.pass { color: var(--green); }
+  .criterion.fail { color: var(--text-dim); }
+  .criterion-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  /* Score ring */
+  .score-wrap {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .score-ring {
+    width: 80px; height: 80px;
+    position: relative; flex-shrink: 0;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; }
+  .score-ring .track { stroke: var(--border); stroke-width: 6; }
+  .score-ring .fill { stroke: var(--green); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 220; transition: stroke-dashoffset 0.5s ease, stroke 0.3s; }
+  .score-number {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 20px; font-weight: bold;
+    color: #fff;
+  }
+  .score-info h3 { font-size: 16px; margin-bottom: 6px; }
+  .score-info p { font-family: var(--mono); font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+  /* Threat monitor */
+  .threats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .threat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .threat-card:hover { border-color: var(--green-dim); }
+  .threat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .threat-card.high::before { background: var(--red); }
+  .threat-card.medium::before { background: var(--yellow); }
+  .threat-card.low::before { background: var(--green); }
+  .threat-level {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+  .threat-card.high .threat-level { color: var(--red); }
+  .threat-card.medium .threat-level { color: var(--yellow); }
+  .threat-card.low .threat-level { color: var(--green); }
+  .threat-name { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .threat-desc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+  .threat-count {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: bold;
+    opacity: 0.15;
+  }
+
+  /* Tips */
+  .tips-list { display: flex; flex-direction: column; gap: 12px; }
+  .tip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    padding: 20px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+  .tip:hover { background: #0d1117ee; }
+  .tip-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .tip-content h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .tip-content p { font-family: var(--mono); font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0;
+    margin-top: 60px;
+    text-align: center;
+  }
+  footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+  footer span { color: var(--green); }
+
+  /* Terminal typing */
+  .terminal {
+    background: #000;
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--green);
+  }
+  .terminal .prompt { color: var(--text-dim); }
+  .cursor { animation: blink 1s step-end infinite; }
+
+  @media (max-width: 600px) {
+    .score-wrap { flex-direction: column; }
+    .tabs { overflow-x: auto; }
+    .tab { white-space: nowrap; padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🛡</div>
+        <div>
+          <div class="logo-text">CYBERSHIELD</div>
+          <div class="logo-sub">RWANDA // v0.1.0-MVP</div>
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-dot"></div>
+        SYSTEM ONLINE
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="hero">
+      <div class="tag">// MVP IN PROGRESS — ALU SE PROJECT 2026</div>
+      <h1>CYBER<span>SHIELD</span><br>RWANDA</h1>
+      <p>Protecting Rwandan SMEs and institutions from digital threats through real-time security awareness and threat detection tools.</p>
+    </div>
+
+    <div class="terminal">
+      <span class="prompt">hirwa@cybershield:~$ </span>initializing security modules...<br>
+      <span class="prompt">hirwa@cybershield:~$ </span>loading threat database... <span style="color:#fff">OK</span><br>
+      <span class="prompt">hirwa@cybershield:~$ </span>starting password analyzer... <span style="color:#fff">OK</span><br>
+      <span class="prompt">hirwa@cybershield:~$ </span><span class="cursor">█</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('password')">PASSWORD CHECKER</button>
+      <button class="tab" onclick="switchTab('threats')">THREAT MONITOR</button>
+      <button class="tab" onclick="switchTab('tips')">SECURITY TIPS</button>
+    </div>
+
+    <!-- PASSWORD CHECKER -->
+    <div class="panel active" id="tab-password">
+      <div class="checker-box">
+        <h2>PASSWORD STRENGTH ANALYZER</h2>
+        <p>// Enter a password to analyze its security strength in real-time</p>
+
+        <div class="input-wrap">
+          <input class="pw-input" type="password" id="pwInput" placeholder="enter password to analyze..." oninput="analyzePassword(this.value)" autocomplete="off"/>
+          <button class="toggle-btn" onclick="togglePw()" id="toggleBtn">👁</button>
+        </div>
+
+        <div class="strength-bars" id="strengthBars">
+          <div class="bar" id="b1"></div>
+          <div class="bar" id="b2"></div>
+          <div class="bar" id="b3"></div>
+          <div class="bar" id="b4"></div>
+          <div class="bar" id="b5"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel" style="color:var(--text-dim)">// awaiting input</div>
+
+        <div class="criteria">
+          <div class="criterion" id="c-len"><span class="criterion-icon">○</span>Minimum 8 characters</div>
+          <div class="criterion" id="c-upper"><span class="criterion-icon">○</span>Contains uppercase letters (A-Z)</div>
+          <div class="criterion" id="c-lower"><span class="criterion-icon">○</span>Contains lowercase letters (a-z)</div>
+          <div class="criterion" id="c-num"><span class="criterion-icon">○</span>Contains numbers (0-9)</div>
+          <div class="criterion" id="c-special"><span class="criterion-icon">○</span>Contains special characters (!@#$%...)</div>
+          <div class="criterion" id="c-long"><span class="criterion-icon">○</span>Strong length: 12+ characters</div>
+        </div>
+
+        <div class="score-wrap">
+          <div class="score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle class="track" cx="40" cy="40" r="35"/>
+              <circle class="fill" id="scoreArc" cx="40" cy="40" r="35"/>
+            </svg>
+            <div class="score-number" id="scoreNum">0</div>
+          </div>
+          <div class="score-info">
+            <h3 id="scoreTitle">No Password Entered</h3>
+            <p id="scoreAdvice">Enter a password above to get your security score and personalized recommendations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THREAT MONITOR -->
+    <div class="panel" id="tab-threats">
+      <div class="threats-grid">
+        <div class="threat-card high">
+          <div class="threat-count">01</div>
+          <div class="threat-level">HIGH RISK</div>
+          <div class="threat-name">Phishing Attacks</div>
+          <div class="threat-desc">Deceptive emails and websites designed to steal login credentials. Most common attack vector in Rwanda targeting banks and mobile money users.</div>
+        </div>
+        <div class="threat-card high">
+          <div class="threat-count">02</div>
+          <div class="threat-level">HIGH RISK</div>
+          <div class="threat-name">Ransomware</div>
+          <div class="threat-desc">Malicious software that encrypts files and demands payment. Increasingly targeting SMEs and healthcare institutions across East Africa.</div>
+        </div>
+        <div class="threat-card medium">
+          <div class="threat-count">03</div>
+          <div class="threat-level">MEDIUM RISK</div>
+          <div class="threat-name">Weak Password Exploits</div>
+          <div class="threat-desc">Over 80% of data breaches involve weak or reused passwords. Many Rwandan SMEs still use default credentials on admin systems.</div>
+        </div>
+        <div class="threat-card medium">
+          <div class="threat-count">04</div>
+          <div class="threat-level">MEDIUM RISK</div>
+          <div class="threat-name">Social Engineering</div>
+          <div class="threat-desc">Manipulation tactics to trick employees into revealing sensitive data or granting system access. Often targets non-technical staff.</div>
+        </div>
+        <div class="threat-card low">
+          <div class="threat-count">05</div>
+          <div class="threat-level">MONITORED</div>
+          <div class="threat-name">Unsecured Public WiFi</div>
+          <div class="threat-desc">Man-in-the-middle attacks on public networks in cafes and co-working spaces. Risk of credential interception for unencrypted traffic.</div>
+        </div>
+        <div class="threat-card low">
+          <div class="threat-count">06</div>
+          <div class="threat-level">MONITORED</div>
+          <div class="threat-name">Data Leakage</div>
+          <div class="threat-desc">Accidental or intentional sharing of sensitive business data via unencrypted channels like WhatsApp or unprotected cloud storage.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="panel" id="tab-tips">
+      <div class="tips-list">
+        <div class="tip">
+          <div class="tip-num">[01]</div>
+          <div class="tip-content">
+            <h3>Use a Password Manager</h3>
+            <p>Never reuse passwords across accounts. Tools like Bitwarden (free) or 1Password generate and store unique strong passwords for every site you use.</p>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-num">[02]</div>
+          <div class="tip-content">
+            <h3>Enable Two-Factor Authentication (2FA)</h3>
+            <p>Add a second verification step on all accounts — especially email, banking, and mobile money. Even if your password is stolen, 2FA blocks access.</p>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-num">[03]</div>
+          <div class="tip-content">
+            <h3>Verify Before You Click</h3>
+            <p>Hover over links before clicking. Check sender email addresses carefully. Legitimate banks and services will never ask for passwords via email or SMS.</p>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-num">[04]</div>
+          <div class="tip-content">
+            <h3>Keep Software Updated</h3>
+            <p>Most cyberattacks exploit known vulnerabilities in outdated software. Enable automatic updates on your OS, browser, and apps to stay protected.</p>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-num">[05]</div>
+          <div class="tip-content">
+            <h3>Backup Your Data — The 3-2-1 Rule</h3>
+            <p>Keep 3 copies of important data, on 2 different storage types, with 1 copy offsite or in the cloud. This protects against ransomware and hardware failure.</p>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-num">[06]</div>
+          <div class="tip-content">
+            <h3>Use HTTPS Websites Only</h3>
+            <p>Always check for the padlock icon and "https://" before entering any sensitive information on a website. Avoid submitting forms on HTTP sites.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>CYBERSHIELD RWANDA // Built by <span>Hirwa Hebert Crispin</span> // ALU Software Engineering 2026 // <span>MVP v0.1 — IN PROGRESS</span></p>
+  </div>
+</footer>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function togglePw() {
+    const inp = document.getElementById('pwInput');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function analyzePassword(pw) {
+    const checks = {
+      len: pw.length >= 8,
+      upper: /[A-Z]/.test(pw),
+      lower: /[a-z]/.test(pw),
+      num: /[0-9]/.test(pw),
+      special: /[^A-Za-z0-9]/.test(pw),
+      long: pw.length >= 12
+    };
+
+    const ids = ['c-len','c-upper','c-lower','c-num','c-special','c-long'];
+    const keys = ['len','upper','lower','num','special','long'];
+    keys.forEach((k, i) => {
+      const el = document.getElementById(ids[i]);
+      el.classList.toggle('pass', checks[k]);
+      el.classList.toggle('fail', !checks[k]);
+      el.querySelector('.criterion-icon').textContent = checks[k] ? '✓' : '○';
+    });
+
+    const score = Object.values(checks).filter(Boolean).length;
+    const pct = Math.round((score / 6) * 100);
+
+    // Bars
+    const colors = ['#ff3b5c','#ff3b5c','#ffd700','#ffd700','#00ff88','#00ff88'];
+    for (let i = 1; i <= 5; i++) {
+      const bar = document.getElementById('b' + i);
+      const fill = i <= Math.ceil(score * 5 / 6);
+      bar.style.background = fill ? colors[score - 1] || 'var(--border)' : 'var(--border)';
+    }
+
+    // Label
+    const labels = ['','// VERY WEAK — critical risk','// WEAK — easily cracked','// MODERATE — needs improvement','// GOOD — fairly secure','// STRONG — well protected','// EXCELLENT — maximum security'];
+    const labelColors = ['','var(--red)','var(--red)','var(--yellow)','var(--yellow)','var(--green)','var(--green)'];
+    const lel = document.getElementById('strengthLabel');
+    if (pw.length === 0) { lel.textContent = '// awaiting input'; lel.style.color = 'var(--text-dim)'; }
+    else { lel.textContent = labels[score] || '// weak'; lel.style.color = labelColors[score] || 'var(--red)'; }
+
+    // Ring
+    const arc = document.getElementById('scoreArc');
+    const offset = 220 - (220 * pct / 100);
+    arc.style.strokeDashoffset = pw.length ? offset : 220;
+    arc.style.stroke = score <= 2 ? 'var(--red)' : score <= 4 ? 'var(--yellow)' : 'var(--green)';
+    document.getElementById('scoreNum').textContent = pw.length ? pct : '0';
+
+    // Advice
+    const titles = ['','Critically Weak','Weak Password','Moderate Security','Good Password','Strong Password','Excellent Password'];
+    const advices = [
+      'Enter a password above to get your security score.',
+      'This password would be cracked in seconds. Add length and mix character types immediately.',
+      'This password is vulnerable. Add uppercase, numbers, and special characters.',
+      'Getting better. Add more character variety and length to strengthen it.',
+      'A decent password. Consider adding special characters for extra security.',
+      'Strong password! For maximum security, make sure it\'s unique to this account.',
+      'Excellent! This password meets all security criteria. Make sure to store it safely.'
+    ];
+    document.getElementById('scoreTitle').textContent = pw.length ? titles[score] : 'No Password Entered';
+    document.getElementById('scoreAdvice').textContent = pw.length ? advices[score] : advices[0];
+  }
+</script>
+</body>
+</html>
