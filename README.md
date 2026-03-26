@@ -115,7 +115,7 @@ Built according to the Software Requirements Specification (SRS) v2.0:
 
 ## SRS Document
 
-📄 [View Full SRS Document](YOUR_SRS_LINK_HERE)
+📄 [View Full SRS Document](https://docs.google.com/document/d/1uEIa6WB2VXWcn9Dl_GLAdD3tALKy53uk/edit?usp=sharing&ouid=108295764626789297640&rtpof=true&sd=true)
 
 ---
 
