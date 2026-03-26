@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureVendor Africa — Secure Student Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4aa;
+    --accent2: #0ea5e9;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text: #f0f4ff;
+    --muted: #6b7fa3;
+    --verified: #00d4aa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+  /* PAGES */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; background: var(--surface);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+  .nav-btn { padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: all 0.2s; }
+  .nav-btn:hover { color: var(--text); border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  .nav-btn.primary:hover { background: #00bfa0; }
+  .nav-user { display: flex; align-items: center; gap: 0.75rem; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: #000; cursor: pointer; }
+
+  /* LANDING */
+  .hero {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 4rem 2rem;
+    background: radial-gradient(ellipse at 50% 0%, #00d4aa18 0%, transparent 60%);
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: #00d4aa15; border: 1px solid #00d4aa40; color: var(--accent); padding: 0.3rem 1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem; }
+  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 1.1rem; color: var(--muted); max-width: 520px; line-height: 1.7; margin-bottom: 2rem; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn { padding: 0.75rem 1.75rem; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #00bfa0; transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; max-width: 900px; margin: 3rem auto 0; padding: 0 1rem; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: left; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .feature-card h3 { font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .feature-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+  /* AUTH */
+  .auth-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 420px; }
+  .auth-card h2 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+  .auth-card .sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 2rem; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.4rem; font-weight: 500; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    transition: border-color 0.2s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .btn-full { width: 100%; padding: 0.85rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-full.primary { background: var(--accent); color: #000; }
+  .btn-full.primary:hover { background: #00bfa0; }
+  .btn-full.google { background: var(--surface2); color: var(--text); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .btn-full.google:hover { border-color: var(--accent2); }
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 1rem 0; color: var(--muted); font-size: 0.8rem; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .auth-link { text-align: center; font-size: 0.85rem; color: var(--muted); margin-top: 1.2rem; }
+  .auth-link a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .role-select { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.2rem; }
+  .role-btn { padding: 0.9rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .role-btn.selected { border-color: var(--accent); color: var(--accent); background: #00d4aa12; }
+  .role-btn .role-icon { font-size: 1.4rem; display: block; margin-bottom: 0.3rem; }
+  .role-btn .role-name { font-size: 0.82rem; font-weight: 600; }
+
+  /* MFA */
+  .mfa-inputs { display: flex; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
+  .mfa-input { width: 48px; height: 56px; text-align: center; font-size: 1.3rem; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); outline: none; font-family: 'Syne', sans-serif; transition: border-color 0.2s; }
+  .mfa-input:focus { border-color: var(--accent); }
+  .mfa-sent { background: #00d4aa12; border: 1px solid #00d4aa30; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--accent); margin-bottom: 1rem; text-align: center; }
+
+  /* DASHBOARD */
+  .dashboard { flex: 1; display: flex; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .sidebar-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--accent); padding: 0 0.5rem; margin-bottom: 1.5rem; }
+  .sidebar-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.75rem; border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 0.88rem; transition: all 0.2s; border: none; background: transparent; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: #00d4aa15; color: var(--accent); }
+  .sidebar-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; }
+  .main { flex: 1; overflow-y: auto; }
+  .main-content { padding: 2rem; max-width: 1000px; }
+  .page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .page-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 2rem; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+  .stat-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.blue { color: var(--accent2); }
+  .stat-value.yellow { color: var(--warning); }
+
+  /* PRODUCTS */
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; cursor: pointer; }
+  .product-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .product-img { height: 160px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+  .product-body { padding: 1rem; }
+  .product-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .product-price { color: var(--accent); font-weight: 700; font-size: 1.1rem; font-family: 'Syne', sans-serif; }
+  .product-vendor { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.3rem; }
+  .verified-badge { background: #00d4aa20; color: var(--accent); font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; border: 1px solid #00d4aa40; }
+  .product-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+  .btn-sm { padding: 0.4rem 0.85rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-sm.primary { background: var(--accent); color: #000; }
+  .btn-sm.outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-sm.outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger)30; }
+  .btn-sm.danger:hover { background: var(--danger)20; }
+
+  /* CHAT */
+  .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 0; height: calc(100vh - 65px); }
+  .chat-list { border-right: 1px solid var(--border); overflow-y: auto; }
+  .chat-list-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; }
+  .chat-item { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 0.75rem; align-items: center; transition: background 0.15s; }
+  .chat-item:hover, .chat-item.active { background: var(--surface2); }
+  .chat-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: #000; flex-shrink: 0; }
+  .chat-info { flex: 1; min-width: 0; }
+  .chat-name { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+  .chat-preview { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.15rem; }
+  .chat-window { display: flex; flex-direction: column; }
+  .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+  .chat-header-info h3 { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+  .chat-header-info p { font-size: 0.78rem; color: var(--accent); }
+  .e2ee-badge { background: #00d4aa15; color: var(--accent); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 99px; border: 1px solid #00d4aa30; }
+  .messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .msg { max-width: 70%; }
+  .msg.sent { align-self: flex-end; }
+  .msg.received { align-self: flex-start; }
+  .msg-bubble { padding: 0.75rem 1rem; border-radius: 14px; font-size: 0.88rem; line-height: 1.5; }
+  .msg.sent .msg-bubble { background: var(--accent); color: #000; border-bottom-right-radius: 4px; }
+  .msg.received .msg-bubble { background: var(--surface2); color: var(--text); border-bottom-left-radius: 4px; }
+  .msg-meta { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
+  .msg.sent .msg-meta { text-align: right; }
+  .chat-input-area { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center; }
+  .chat-input { flex: 1; padding: 0.7rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
+  .chat-input:focus { border-color: var(--accent); }
+  .send-btn { padding: 0.7rem 1.25rem; background: var(--accent); color: #000; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* TRANSACTION LOG */
+  .log-table { width: 100%; border-collapse: collapse; }
+  .log-table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .log-table td { padding: 0.85rem 1rem; font-size: 0.85rem; border-bottom: 1px solid var(--border)80; }
+  .log-table tr:hover td { background: var(--surface2); }
+  .status-badge { padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.72rem; font-weight: 600; }
+  .status-badge.completed { background: #00d4aa20; color: var(--accent); }
+  .status-badge.pending { background: #f59e0b20; color: var(--warning); }
+  .status-badge.flagged { background: #ef444420; color: var(--danger); }
+  .immutable-note { display: flex; align-items: center; gap: 0.5rem; background: #0ea5e915; border: 1px solid #0ea5e930; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--accent2); margin-bottom: 1.5rem; }
+
+  /* FRAUD REPORT */
+  .fraud-banner { background: #ef444415; border: 1px solid #ef444430; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .fraud-banner .icon { font-size: 1.5rem; flex-shrink: 0; }
+  .fraud-banner h3 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .fraud-banner p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ADMIN */
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.78rem; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .admin-table td { padding: 0.85rem 1rem; font-size: 0.85rem; border-bottom: 1px solid var(--border)80; }
+
+  /* LIST PRODUCT */
+  .list-form { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 560px; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: #000a; display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; width: 100%; max-width: 440px; }
+  .modal h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .modal p { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 0.75rem; }
+
+  /* ALERT */
+  .alert { padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; }
+  .alert.success { background: #00d4aa15; border: 1px solid #00d4aa30; color: var(--accent); }
+  .alert.error { background: #ef444415; border: 1px solid #ef444430; color: var(--danger); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab { padding: 0.6rem 1.25rem; cursor: pointer; font-size: 0.88rem; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .chat-layout { grid-template-columns: 1fr; }
+    .chat-list { display: none; }
+  }
+
+  .hidden { display: none !important; }
+  .section { display: none; }
+  .section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ LANDING PAGE -->
+<div class="page active" id="page-landing">
+  <nav>
+    <div class="logo">Secure<span>Vendor</span> Africa</div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="showPage('page-login')">Sign In</button>
+      <button class="nav-btn primary" onclick="showPage('page-register')">Get Started</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <div class="hero-badge">🔒 ALU-Verified Student Commerce</div>
+    <h1>Trade Safely.<br><span>No More WhatsApp Scams.</span></h1>
+    <p>SecureVendor Africa is the first encrypted peer-to-peer marketplace built for ALU students. Share payment details safely, verify vendors instantly, and trade with confidence.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="showPage('page-register')">Start Selling Securely</button>
+      <button class="btn btn-outline" onclick="showPage('page-register')">Browse Products</button>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>ALU ID Verified</h3>
+        <p>Only real ALU students can sell. Every vendor is verified via Google OAuth before listing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>E2EE Messaging</h3>
+        <p>All payment details and location sharing happen through end-to-end encrypted chat.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Audit Trail</h3>
+        <p>Every transaction is automatically logged. Full dispute resolution support.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚨</div>
+        <h3>Fraud Protection</h3>
+        <p>One-click fraud reporting. Accounts with 3+ reports are automatically frozen.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ LOGIN PAGE -->
+<div class="page" id="page-login">
+  <nav>
+    <div class="logo" onclick="showPage('page-landing')" style="cursor:pointer">Secure<span>Vendor</span> Africa</div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="showPage('page-landing')">← Back</button>
+    </div>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to your SecureVendor account</p>
+      <button class="btn-full google" onclick="handleGoogleLogin()">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google (ALU Email)
+      </button>
+      <div class="divider">or sign in with email</div>
+      <div id="login-alert"></div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@alustudent.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+      </div>
+      <button class="btn-full primary" onclick="handleLogin()">Sign In</button>
+      <p class="auth-link">No account? <a onclick="showPage('page-register')">Create one</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ REGISTER PAGE -->
+<div class="page" id="page-register">
+  <nav>
+    <div class="logo" onclick="showPage('page-landing')" style="cursor:pointer">Secure<span>Vendor</span> Africa</div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="showPage('page-landing')">← Back</button>
+    </div>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p class="sub">Join the secure ALU student marketplace</p>
+      <div id="reg-alert"></div>
+      <div class="form-group">
+        <label>I am a...</label>
+        <div class="role-select">
+          <div class="role-btn selected" id="role-vendor" onclick="selectRole('vendor')">
+            <span class="role-icon">🏪</span>
+            <span class="role-name">Vendor</span>
+          </div>
+          <div class="role-btn" id="role-buyer" onclick="selectRole('buyer')">
+            <span class="role-icon">🛍️</span>
+            <span class="role-name">Buyer</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="Hirwa Hebert Crispin" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reg-email" placeholder="you@alustudent.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-pass" placeholder="Min 8 characters" />
+      </div>
+      <div class="form-group" id="trust-agreement-wrap">
+        <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer">
+          <input type="checkbox" id="trust-agree" style="width:auto;margin-top:3px" />
+          <span style="font-size:0.82rem;color:var(--muted)">I agree to the <a href="#" style="color:var(--accent)">Trust Agreement</a> and SecureVendor Africa terms of use</span>
+        </label>
+      </div>
+      <button class="btn-full primary" onclick="handleRegister()">Create Account & Verify</button>
+      <p class="auth-link">Already have an account? <a onclick="showPage('page-login')">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ MFA PAGE -->
+<div class="page" id="page-mfa">
+  <nav>
+    <div class="logo">Secure<span>Vendor</span> Africa</div>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
+      <h2>Two-Factor Authentication</h2>
+      <p class="sub" style="margin-bottom:1rem">Multi-Factor Authentication required for all vendor accounts</p>
+      <div class="mfa-sent">✓ A 6-digit code has been sent to your email</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem">Enter the code below (use <strong style="color:var(--accent)">123456</strong> for demo)</p>
+      <div class="mfa-inputs">
+        <input class="mfa-input" maxlength="1" id="m1" oninput="mfaNext(this,'m2')" />
+        <input class="mfa-input" maxlength="1" id="m2" oninput="mfaNext(this,'m3')" />
+        <input class="mfa-input" maxlength="1" id="m3" oninput="mfaNext(this,'m4')" />
+        <input class="mfa-input" maxlength="1" id="m4" oninput="mfaNext(this,'m5')" />
+        <input class="mfa-input" maxlength="1" id="m5" oninput="mfaNext(this,'m6')" />
+        <input class="mfa-input" maxlength="1" id="m6" oninput="mfaNext(this,null)" />
+      </div>
+      <div id="mfa-alert"></div>
+      <button class="btn-full primary" onclick="verifyMFA()">Verify & Enter Dashboard</button>
+      <p style="font-size:0.8rem;color:var(--muted);margin-top:1rem">Didn't receive? <a href="#" style="color:var(--accent)" onclick="alert('Code resent!')">Resend code</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <nav>
+    <div class="logo">Secure<span>Vendor</span> Africa</div>
+    <div class="nav-user">
+      <span style="font-size:0.85rem;color:var(--muted)" id="nav-username"></span>
+      <span class="verified-badge" id="nav-badge">✓ ALU Verified</span>
+      <div class="avatar" id="nav-avatar" onclick="handleLogout()">H</div>
+    </div>
+  </nav>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="sidebar-logo">SecureVendor</div>
+      <button class="sidebar-item active" onclick="showSection('browse')" id="nav-browse">
+        <span class="icon">🏠</span> Browse Market
+      </button>
+      <button class="sidebar-item" onclick="showSection('messages')" id="nav-messages">
+        <span class="icon">💬</span> Encrypted Chat
+      </button>
+      <button class="sidebar-item" onclick="showSection('transactions')" id="nav-transactions">
+        <span class="icon">📋</span> Transaction Log
+      </button>
+      <button class="sidebar-item" onclick="showSection('report')" id="nav-report">
+        <span class="icon">🚨</span> Report Fraud
+      </button>
+      <button class="sidebar-item" onclick="showSection('list')" id="nav-list" style="display:none">
+        <span class="icon">➕</span> List Product
+      </button>
+      <button class="sidebar-item" onclick="showSection('admin')" id="nav-admin" style="display:none">
+        <span class="icon">⚙️</span> Admin Panel
+      </button>
+      <div class="sidebar-bottom">
+        <button class="sidebar-item" onclick="handleLogout()">
+          <span class="icon">🚪</span> Sign Out
+        </button>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="main-content">
+
+        <!-- BROWSE -->
+        <div class="section active" id="section-browse">
+          <h1 class="page-title">Student Marketplace</h1>
+          <p class="page-sub">All vendors are ALU-verified. Payment details shared only via E2EE chat.</p>
+          <div class="stats-grid" id="browse-stats">
+            <div class="stat-card"><div class="stat-label">Active Listings</div><div class="stat-value green">24</div></div>
+            <div class="stat-card"><div class="stat-label">Verified Vendors</div><div class="stat-value blue">8</div></div>
+            <div class="stat-card"><div class="stat-label">Safe Trades Today</div><div class="stat-value green">12</div></div>
+            <div class="stat-card"><div class="stat-label">Fraud Prevented</div><div class="stat-value yellow">3</div></div>
+          </div>
+          <div class="products-grid" id="products-grid"></div>
+        </div>
+
+        <!-- MESSAGES -->
+        <div class="section" id="section-messages" style="padding:0;max-width:100%">
+          <div class="chat-layout">
+            <div class="chat-list">
+              <div class="chat-list-header">🔐 Encrypted Chats</div>
+              <div id="chat-list-items"></div>
+            </div>
+            <div class="chat-window" id="chat-window">
+              <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:0.9rem">
+                Select a conversation to start chatting securely
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <div class="section" id="section-transactions">
+          <h1 class="page-title">Transaction Log</h1>
+          <p class="page-sub">Immutable audit trail of all marketplace activity.</p>
+          <div class="immutable-note">🔒 All records are immutable and tamper-proof. Used for dispute resolution.</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+            <table class="log-table">
+              <thead><tr>
+                <th>Tx ID</th><th>Buyer</th><th>Vendor</th><th>Product</th><th>Amount</th><th>Time</th><th>Status</th>
+              </tr></thead>
+              <tbody id="tx-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- REPORT FRAUD -->
+        <div class="section" id="section-report">
+          <h1 class="page-title">Report Fraud</h1>
+          <p class="page-sub">Help keep the ALU marketplace safe for everyone.</p>
+          <div class="fraud-banner">
+            <div class="icon">⚠️</div>
+            <div>
+              <h3>Automatic Protection Active</h3>
+              <p>Any vendor who receives 3 or more unique fraud reports within 30 days will have their account automatically frozen pending admin review. Your report is anonymous.</p>
+            </div>
+          </div>
+          <div class="list-form">
+            <div id="report-alert"></div>
+            <div class="form-group">
+              <label>Vendor to Report</label>
+              <select id="report-vendor">
+                <option value="">Select a vendor...</option>
+                <option>Isaac Mugisha (@isaac.m)</option>
+                <option>Amina Uwase (@amina.u)</option>
+                <option>Patrick Nkurunziza (@patrick.n)</option>
+                <option>Grace Uwimana (@grace.u)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Type of Fraud</label>
+              <select id="report-type">
+                <option value="">Select type...</option>
+                <option>Item not delivered</option>
+                <option>Fake product listing</option>
+                <option>Payment scam</option>
+                <option>Impersonation</option>
+                <option>Other suspicious behavior</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="report-desc" placeholder="Describe what happened in detail..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Transaction ID (if applicable)</label>
+              <input type="text" id="report-txid" placeholder="e.g. TXN-2026-0042" />
+            </div>
+            <button class="btn-full primary" onclick="submitReport()">🚨 Submit Fraud Report</button>
+          </div>
+        </div>
+
+        <!-- LIST PRODUCT (Vendor only) -->
+        <div class="section" id="section-list">
+          <h1 class="page-title">List a Product</h1>
+          <p class="page-sub">Your listing will show a Verified badge since you are ALU-authenticated.</p>
+          <div class="list-form">
+            <div id="list-alert"></div>
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" id="list-name" placeholder="e.g. Calculus Textbook 3rd Ed." />
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="list-category">
+                <option>Books & Study Materials</option>
+                <option>Electronics & Gadgets</option>
+                <option>Food & Drinks</option>
+                <option>Clothing & Fashion</option>
+                <option>Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Price (RWF)</label>
+              <input type="number" id="list-price" placeholder="5000" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="list-desc" placeholder="Describe your product..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Product Photo (Secure HTTPS Upload)</label>
+              <input type="file" id="list-photo" accept="image/*" style="padding:0.5rem" />
+            </div>
+            <button class="btn-full primary" onclick="submitListing()">✓ List Product Securely</button>
+          </div>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div class="section" id="section-admin">
+          <h1 class="page-title">Admin Panel</h1>
+          <p class="page-sub">Security monitoring, user management and audit reports.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value blue">47</div></div>
+            <div class="stat-card"><div class="stat-label">Active Listings</div><div class="stat-value green">24</div></div>
+            <div class="stat-card"><div class="stat-label">Fraud Reports</div><div class="stat-value yellow">5</div></div>
+            <div class="stat-card"><div class="stat-label">Frozen Accounts</div><div class="stat-value" style="color:var(--danger)">1</div></div>
+          </div>
+          <div class="tabs">
+            <button class="tab active" onclick="adminTab(this,'admin-users')">Users</button>
+            <button class="tab" onclick="adminTab(this,'admin-reports')">Fraud Reports</button>
+            <button class="tab" onclick="adminTab(this,'admin-audit')">Audit Report</button>
+          </div>
+          <div id="admin-users">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+              <table class="admin-table">
+                <thead><tr><th>User</th><th>Role</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="admin-users-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="admin-reports" style="display:none">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+              <table class="admin-table">
+                <thead><tr><th>Report ID</th><th>Against</th><th>Type</th><th>Reports</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td>#R001</td><td>Patrick N.</td><td>Payment Scam</td><td><span class="status-badge flagged">3 reports</span></td><td><button class="btn-sm danger" onclick="alert('Account frozen!')">Freeze Account</button></td></tr>
+                  <tr><td>#R002</td><td>Unknown User</td><td>Fake Listing</td><td><span class="status-badge pending">1 report</span></td><td><button class="btn-sm outline">Investigate</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div id="admin-audit" style="display:none">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem">
+              <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1rem">Generate weekly security audit reports for all logged transactions.</p>
+              <button class="btn btn-primary" onclick="alert('Weekly audit report generated and sent to admin email!')">📊 Generate Weekly Audit Report</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="modal-confirm">Confirm</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════ STATE
+let currentUser = null;
+let selectedRole = 'vendor';
+let activeSection = 'browse';
+let activeChatUser = null;
+let mfaAttempts = 0;
+
+const products = [
+  { id:1, name:'Calculus Textbook 3rd Ed.', price:'5,000 RWF', vendor:'Isaac Mugisha', emoji:'📚', category:'Books', verified:true },
+  { id:2, name:'HP Laptop Charger 65W', price:'8,500 RWF', vendor:'Amina Uwase', emoji:'🔌', category:'Electronics', verified:true },
+  { id:3, name:'Homemade Samosas (12pcs)', price:'3,000 RWF', vendor:'Grace Uwimana', emoji:'🥟', category:'Food', verified:true },
+  { id:4, name:'Python Programming Guide', price:'2,500 RWF', vendor:'Patrick Nkurunziza', emoji:'🐍', category:'Books', verified:false },
+  { id:5, name:'USB-C Hub 7-in-1', price:'15,000 RWF', vendor:'Isaac Mugisha', emoji:'💻', category:'Electronics', verified:true },
+  { id:6, name:'ALU Hoodie (Size M)', price:'12,000 RWF', vendor:'Amina Uwase', emoji:'👕', category:'Clothing', verified:true },
+];
+
+const transactions = [
+  { id:'TXN-2026-0042', buyer:'Hebert H.', vendor:'Isaac M.', product:'Calculus Textbook', amount:'5,000 RWF', time:'Today 09:14', status:'completed' },
+  { id:'TXN-2026-0041', buyer:'Grace U.', vendor:'Amina U.', product:'HP Charger', amount:'8,500 RWF', time:'Today 08:30', status:'completed' },
+  { id:'TXN-2026-0040', buyer:'Patrick N.', vendor:'Grace U.', product:'Samosas', amount:'3,000 RWF', time:'Yesterday', status:'completed' },
+  { id:'TXN-2026-0039', buyer:'Unknown', vendor:'Patrick N.', product:'Unknown', amount:'—', time:'Yesterday', status:'flagged' },
+  { id:'TXN-2026-0038', buyer:'Amina U.', vendor:'Isaac M.', product:'USB-C Hub', amount:'15,000 RWF', time:'Mar 24', status:'pending' },
+];
+
+const adminUsers = [
+  { name:'Isaac Mugisha', role:'Vendor', email:'i.mugisha@alustudent.com', status:'active' },
+  { name:'Amina Uwase', role:'Vendor', email:'a.uwase@alustudent.com', status:'active' },
+  { name:'Patrick Nkurunziza', role:'Vendor', email:'p.nkurunziza@alustudent.com', status:'frozen' },
+  { name:'Grace Uwimana', role:'Vendor', email:'g.uwimana@alustudent.com', status:'active' },
+  { name:'External Buyer 1', role:'Buyer', email:'buyer1@gmail.com', status:'active' },
+];
+
+const chatConvos = {
+  'Isaac Mugisha': [
+    { from:'them', text:'Hi! I saw your interest in the Calculus textbook.', time:'09:10' },
+    { from:'me', text:'Yes! Is it still available?', time:'09:11' },
+    { from:'them', text:'Yes it is! I can meet at the ALU library at 2pm.', time:'09:12' },
+    { from:'me', text:'Perfect! How do I pay?', time:'09:13' },
+    { from:'them', text:'Send via MoMo to 078-XXX-XXXX (shared securely via E2EE)', time:'09:14' },
+  ],
+  'Amina Uwase': [
+    { from:'them', text:'Hello! Looking for the HP charger?', time:'08:25' },
+    { from:'me', text:'Yes, is it compatible with HP Elitebook?', time:'08:26' },
+    { from:'them', text:'Yes it is! Universal 65W USB-C.', time:'08:27' },
+  ],
+  'Grace Uwimana': [
+    { from:'them', text:'Samosas are fresh today! Order by 12pm.', time:'07:00' },
+  ]
+};
+
+// ══════════════════ NAVIGATION
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+id);
+  if(navEl) navEl.classList.add('active');
+  activeSection = id;
+  if(id === 'messages') renderChatList();
+}
+
+// ══════════════════ AUTH
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-vendor').classList.toggle('selected', role==='vendor');
+  document.getElementById('role-buyer').classList.toggle('selected', role==='buyer');
+}
+
+function handleGoogleLogin() {
+  currentUser = { name:'Hirwa Hebert Crispin', email:'h.hirwa@alustudent.com', role:'vendor', initials:'HH' };
+  showPage('page-mfa');
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass = document.getElementById('login-pass').value;
+  const alert = document.getElementById('login-alert');
+  if(!email || !pass) { showAlert(alert, 'Please fill in all fields.', 'error'); return; }
+  if(email === 'admin@alustudent.com') {
+    currentUser = { name:'Admin User', email, role:'admin', initials:'AD' };
+  } else if(email.includes('@alustudent.com') || email.includes('@alueducation.com')) {
+    currentUser = { name: email.split('@')[0].replace('.',' '), email, role: selectedRole, initials: email[0].toUpperCase() };
+  } else {
+    currentUser = { name: email.split('@')[0], email, role:'buyer', initials: email[0].toUpperCase() };
+  }
+  if(currentUser.role === 'vendor' || currentUser.role === 'admin') {
+    showPage('page-mfa');
+  } else {
+    enterDashboard();
+  }
+}
+
+function handleRegister() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const pass = document.getElementById('reg-pass').value;
+  const agree = document.getElementById('trust-agree').checked;
+  const alertEl = document.getElementById('reg-alert');
+  if(!name||!email||!pass) { showAlert(alertEl,'Please fill in all fields.','error'); return; }
+  if(!agree) { showAlert(alertEl,'You must agree to the Trust Agreement.','error'); return; }
+  if(pass.length < 8) { showAlert(alertEl,'Password must be at least 8 characters.','error'); return; }
+  currentUser = { name, email, role: selectedRole, initials: name[0].toUpperCase() };
+  if(selectedRole === 'vendor') {
+    showPage('page-mfa');
+  } else {
+    enterDashboard();
+  }
+}
+
+function mfaNext(el, nextId) {
+  if(el.value && nextId) document.getElementById(nextId).focus();
+}
+
+function verifyMFA() {
+  const code = ['m1','m2','m3','m4','m5','m6'].map(id => document.getElementById(id).value).join('');
+  const alertEl = document.getElementById('mfa-alert');
+  mfaAttempts++;
+  if(mfaAttempts >= 3 && code !== '123456') {
+    showAlert(alertEl,'Account locked after 3 failed attempts. Contact admin.','error');
+    return;
+  }
+  if(code === '123456') {
+    mfaAttempts = 0;
+    enterDashboard();
+  } else {
+    showAlert(alertEl, `Incorrect code. ${3-mfaAttempts} attempt(s) remaining.`, 'error');
+  }
+}
+
+function enterDashboard() {
+  document.getElementById('nav-username').textContent = currentUser.name;
+  document.getElementById('nav-avatar').textContent = currentUser.initials;
+  if(currentUser.role === 'vendor') {
+    document.getElementById('nav-list').style.display = 'flex';
+    document.getElementById('nav-badge').textContent = '✓ ALU Verified Vendor';
+  } else if(currentUser.role === 'admin') {
+    document.getElementById('nav-admin').style.display = 'flex';
+    document.getElementById('nav-list').style.display = 'flex';
+    document.getElementById('nav-badge').textContent = '⚙ Admin';
+  } else {
+    document.getElementById('nav-badge').textContent = '🛍 Buyer';
+  }
+  renderProducts();
+  renderTransactions();
+  renderAdminUsers();
+  showPage('page-dashboard');
+  showSection('browse');
+}
+
+function handleLogout() {
+  currentUser = null;
+  mfaAttempts = 0;
+  showPage('page-landing');
+}
+
+// ══════════════════ PRODUCTS
+function renderProducts() {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card">
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">${p.price}</div>
+        <div class="product-vendor">
+          ${p.vendor} ${p.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}
+        </div>
+        <div class="product-actions">
+          <button class="btn-sm primary" onclick="openChat('${p.vendor}')">💬 Secure Chat</button>
+          <button class="btn-sm outline" onclick="reportProduct('${p.vendor}')">🚨</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openChat(vendor) {
+  showSection('messages');
+  setTimeout(() => loadChat(vendor), 100);
+}
+
+function reportProduct(vendor) {
+  showSection('report');
+  document.getElementById('report-vendor').value = vendor.includes('Isaac') ? 'Isaac Mugisha (@isaac.m)' :
+    vendor.includes('Amina') ? 'Amina Uwase (@amina.u)' :
+    vendor.includes('Patrick') ? 'Patrick Nkurunziza (@patrick.n)' : 'Grace Uwimana (@grace.u)';
+}
+
+// ══════════════════ CHAT
+function renderChatList() {
+  const list = document.getElementById('chat-list-items');
+  list.innerHTML = Object.keys(chatConvos).map(name => {
+    const msgs = chatConvos[name];
+    const last = msgs[msgs.length-1];
+    return `<div class="chat-item ${activeChatUser===name?'active':''}" onclick="loadChat('${name}')">
+      <div class="chat-avatar">${name[0]}</div>
+      <div class="chat-info">
+        <div class="chat-name">${name} <span class="verified-badge" style="font-size:0.65rem">✓</span></div>
+        <div class="chat-preview">${last.from==='me'?'You: ':''}${last.text}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadChat(name) {
+  activeChatUser = name;
+  renderChatList();
+  const msgs = chatConvos[name];
+  document.getElementById('chat-window').innerHTML = `
+    <div class="chat-header">
+      <div class="chat-avatar">${name[0]}</div>
+      <div class="chat-header-info">
+        <h3>${name} <span class="verified-badge">✓ Verified</span></h3>
+        <p>🔐 End-to-End Encrypted <span class="e2ee-badge">E2EE Active</span></p>
+      </div>
+    </div>
+    <div class="messages" id="msg-area">
+      ${msgs.map(m => `
+        <div class="msg ${m.from==='me'?'sent':'received'}">
+          <div class="msg-bubble">${m.text}</div>
+          <div class="msg-meta">${m.time} ${m.from==='me'?'· ✓✓':''}</div>
+        </div>`).join('')}
+    </div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="chat-input-field" placeholder="Type a message... (E2EE encrypted)" onkeydown="if(event.key==='Enter')sendMsg('${name}')" />
+      <button class="send-btn" onclick="sendMsg('${name}')">Send</button>
+    </div>`;
+  const msgArea = document.getElementById('msg-area');
+  if(msgArea) msgArea.scrollTop = msgArea.scrollHeight;
+}
+
+function sendMsg(name) {
+  const input = document.getElementById('chat-input-field');
+  const text = input.value.trim();
+  if(!text) return;
+  const now = new Date();
+  const time = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  chatConvos[name].push({ from:'me', text, time });
+  input.value = '';
+  loadChat(name);
+  setTimeout(() => {
+    chatConvos[name].push({ from:'them', text:'Thanks for your message! I\'ll get back to you shortly.', time });
+    loadChat(name);
+  }, 1200);
+}
+
+// ══════════════════ TRANSACTIONS
+function renderTransactions() {
+  document.getElementById('tx-table-body').innerHTML = transactions.map(t => `
+    <tr>
+      <td style="font-family:monospace;font-size:0.78rem;color:var(--muted)">${t.id}</td>
+      <td>${t.buyer}</td><td>${t.vendor}</td><td>${t.product}</td>
+      <td style="font-weight:600">${t.amount}</td><td style="color:var(--muted)">${t.time}</td>
+      <td><span class="status-badge ${t.status}">${t.status}</span></td>
+    </tr>`).join('');
+}
+
+// ══════════════════ FRAUD REPORT
+function submitReport() {
+  const vendor = document.getElementById('report-vendor').value;
+  const type = document.getElementById('report-type').value;
+  const desc = document.getElementById('report-desc').value;
+  const alertEl = document.getElementById('report-alert');
+  if(!vendor||!type||!desc) { showAlert(alertEl,'Please fill in all required fields.','error'); return; }
+  showAlert(alertEl,'✓ Fraud report submitted. Admin has been notified. If this vendor reaches 3 reports, their account will be automatically frozen.','success');
+  document.getElementById('report-vendor').value='';
+  document.getElementById('report-type').value='';
+  document.getElementById('report-desc').value='';
+}
+
+// ══════════════════ LIST PRODUCT
+function submitListing() {
+  const name = document.getElementById('list-name').value;
+  const price = document.getElementById('list-price').value;
+  const desc = document.getElementById('list-desc').value;
+  const alertEl = document.getElementById('list-alert');
+  if(!name||!price||!desc) { showAlert(alertEl,'Please fill in all required fields.','error'); return; }
+  const emojis = ['📦','🎁','✨','🛍️','💡'];
+  products.unshift({ id: Date.now(), name, price: parseInt(price).toLocaleString()+' RWF', vendor: currentUser.name, emoji: emojis[Math.floor(Math.random()*emojis.length)], category: document.getElementById('list-category').value, verified: true });
+  showAlert(alertEl,'✓ Product listed successfully with Verified badge! Visible in the marketplace now.','success');
+  document.getElementById('list-name').value='';
+  document.getElementById('list-price').value='';
+  document.getElementById('list-desc').value='';
+}
+
+// ══════════════════ ADMIN
+function renderAdminUsers() {
+  document.getElementById('admin-users-body').innerHTML = adminUsers.map(u => `
+    <tr>
+      <td><strong>${u.name}</strong></td>
+      <td><span class="status-badge ${u.role==='Vendor'?'completed':'pending'}">${u.role}</span></td>
+      <td style="color:var(--muted);font-size:0.8rem">${u.email}</td>
+      <td><span class="status-badge ${u.status==='active'?'completed':'flagged'}">${u.status}</span></td>
+      <td>
+        ${u.status==='active'
+          ? `<button class="btn-sm danger" onclick="alert('Account frozen for ${u.name}')">Freeze</button>`
+          : `<button class="btn-sm outline" onclick="alert('Account reactivated for ${u.name}')">Unfreeze</button>`}
+      </td>
+    </tr>`).join('');
+}
+
+function adminTab(el, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['admin-users','admin-reports','admin-audit'].forEach(s => {
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+}
+
+// ══════════════════ UTILS
+function showAlert(el, msg, type) {
+  el.innerHTML = `<div class="alert ${type}">${msg}</div>`;
+  if(type === 'success') setTimeout(() => el.innerHTML='', 5000);
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+</script>
+</body>
+</html>
